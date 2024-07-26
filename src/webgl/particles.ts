@@ -30,7 +30,7 @@ export default class Particles {
     this.gltfLoader = gltfLoader
 
     this.models = []
-    this.currentModelIndex = 1
+    this.currentModelIndex = 2
 
     this.loadModels()
   }
@@ -56,6 +56,7 @@ export default class Particles {
     const promises = Promise.all([
       this.loadModel('./static/nissan_skyline/scene.gltf'),
       this.loadModel('./static/suzuki_alto/scene.gltf'),
+      this.loadModel('./static/volkswagen_van/scene.gltf'),
     ])
 
     promises.then(() => {
@@ -100,6 +101,7 @@ export default class Particles {
     this.geometry.setAttribute('position', position)
     this.geometry.setAttribute('modelUv', uv)
     this.geometry.scale(10, 10, 10)
+    this.geometry.rotateY(-Math.PI / 5)
   }
 
   onResize(dimensions: Dimensions) {

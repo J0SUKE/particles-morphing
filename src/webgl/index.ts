@@ -3,6 +3,7 @@ import { Dimensions, Size } from '../types/types'
 import Particles from './particles'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import GUI from 'lil-gui'
 
 export default class Canvas {
   element: HTMLCanvasElement
@@ -18,6 +19,7 @@ export default class Canvas {
   particles: Particles
   orbitControls: OrbitControls
   gltfLoader: GLTFLoader
+  debug: GUI
 
   constructor() {
     this.element = document.getElementById('webgl') as HTMLCanvasElement
@@ -31,6 +33,7 @@ export default class Canvas {
     this.createRayCaster()
     this.createOrbitControls()
     this.addEventListeners()
+    this.createDebug()
     this.createParticles()
     this.render()
   }
@@ -66,6 +69,10 @@ export default class Canvas {
     this.renderer.render(this.scene, this.camera)
 
     this.renderer.setPixelRatio(this.dimensions.pixelRatio)
+  }
+
+  createDebug() {
+    this.debug = new GUI()
   }
 
   setSizes() {
@@ -124,13 +131,21 @@ export default class Canvas {
   }
 
   createParticles() {
-    this.particles = new Particles({ scene: this.scene, dimensions: this.dimensions, gltfLoader: this.gltfLoader })
+    this.particles = new Particles({
+      scene: this.scene,
+      dimensions: this.dimensions,
+      gltfLoader: this.gltfLoader,
+      debug: this.debug,
+      renderer: this.renderer,
+    })
   }
 
   render() {
     this.time = this.clock.getElapsedTime()
 
     this.orbitControls.update()
+
+    this.particles.render(this.time)
 
     this.renderer.render(this.scene, this.camera)
   }

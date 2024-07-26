@@ -4,6 +4,7 @@ uniform float uSize;
 uniform sampler2D uTexture;
 
 attribute vec2 modelUv;
+attribute float aSize;
 varying vec3 vColor;
 
 void main()
@@ -13,7 +14,7 @@ void main()
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
 
-    gl_PointSize = uSize* uResolution.y;
+    gl_PointSize = uSize*aSize *uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
     vec4 texel = texture(uTexture,modelUv);

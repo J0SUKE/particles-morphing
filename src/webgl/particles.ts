@@ -6,6 +6,7 @@ import { Dimensions } from '../types/types'
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import GUI from 'lil-gui'
 import GPGPU from './gpgpu'
+import gsap from 'gsap'
 
 interface Props {
   scene: THREE.Scene
@@ -25,12 +26,14 @@ export default class Particles {
   scene: THREE.Scene
   verticesCount: number
   models: {
+    //will store the base geometries
     geometry: THREE.BufferGeometry
     texture: THREE.Texture
   }[]
   currentModelIndex: number
+  currentGPGPUIndex: number
   debug: GUI
-  gpgpu: GPGPU
+  gpgpus: GPGPU[]
   time: number
 
   constructor({ scene, dimensions, gltfLoader, debug, renderer }: Props) {
@@ -41,16 +44,20 @@ export default class Particles {
     this.renderer = renderer
 
     this.models = []
-    this.currentModelIndex = 2
+    this.gpgpus = []
+    this.currentModelIndex = 0
+    this.currentGPGPUIndex = 0
     this.time = 0
 
     this.loadModels()
   }
 
-  createMaterial(texture?: THREE.Texture) {
+  createMaterial() {
     if (this.material) {
       this.material.dispose()
     }
+
+    const texture = this.models[this.currentModelIndex].texture
 
     this.material = new THREE.ShaderMaterial({
       vertexShader,
@@ -63,7 +70,11 @@ export default class Particles {
           )
         ),
         uTexture: new THREE.Uniform(texture),
+        uTargetTexture: new THREE.Uniform(texture),
         uSize: new THREE.Uniform(0.04),
+        uProgress: new THREE.Uniform(0),
+        uParticlesTexture: new THREE.Uniform(new THREE.Vector4()),
+        uParticlesTargetTexture: new THREE.Uniform(new THREE.Vector4()),
       },
     })
   }
@@ -155,9 +166,12 @@ export default class Particles {
       return model
     })
 
+    this.models.forEach((model) => {
+      this.createGPGPU(model.geometry)
+    })
+
     this.setDebug()
-    this.selectModel(0)
-    this.createGPGPU()
+    this.selectModel(this.currentModelIndex)
   }
 
   selectModel(index: number) {
@@ -167,25 +181,47 @@ export default class Particles {
 
     this.currentModelIndex = index
 
-    this.createGeometry(
-      this.models[this.currentModelIndex].geometry.attributes.position as THREE.BufferAttribute,
-      this.models[this.currentModelIndex].geometry.attributes.uv as THREE.BufferAttribute
-    )
-    this.createMaterial(this.models[this.currentModelIndex].texture)
+    this.createGeometry()
+    this.createMaterial()
     this.createPoints()
   }
 
   setDebug() {
     const f: any = {}
 
+    const animateProgress = (index: number) => {
+      gsap.fromTo(
+        this.material.uniforms.uProgress,
+        { value: 0 },
+        {
+          value: 1,
+          duration: 1,
+          ease: 'linear',
+          onComplete: () => {
+            this.currentGPGPUIndex = index
+            this.selectModel(index)
+          },
+        }
+      )
+    }
+
     f.model0 = () => {
-      this.selectModel(0)
+      this.material.uniforms.uParticlesTargetTexture.value = this.gpgpus[0].getTexture()
+      this.material.uniforms.uTargetTexture.value = this.models[0].texture
+      this.geometry.setAttribute('targetModelUv', this.models[0].geometry.attributes.uv)
+      animateProgress(0)
     }
     f.model1 = () => {
-      this.selectModel(1)
+      this.material.uniforms.uParticlesTargetTexture.value = this.gpgpus[1].getTexture()
+      this.material.uniforms.uTargetTexture.value = this.models[1].texture
+      this.geometry.setAttribute('targetModelUv', this.models[1].geometry.attributes.uv)
+      animateProgress(1)
     }
     f.model2 = () => {
-      this.selectModel(2)
+      this.material.uniforms.uParticlesTargetTexture.value = this.gpgpus[2].getTexture()
+      this.material.uniforms.uTargetTexture.value = this.models[2].texture
+      this.geometry.setAttribute('targetModelUv', this.models[2].geometry.attributes.uv)
+      animateProgress(2)
     }
 
     this.debug.add(f, 'model0')
@@ -193,14 +229,34 @@ export default class Particles {
     this.debug.add(f, 'model2')
   }
 
-  createGeometry(position: THREE.BufferAttribute, uv: THREE.BufferAttribute) {
+  createGeometry() {
     if (this.geometry) {
       this.geometry.dispose()
     }
 
+    const colorUvs = this.models[this.currentModelIndex].geometry.attributes.uv as THREE.BufferAttribute
+    const particlesUvArray = new Float32Array(this.verticesCount * 2)
+
+    const gpgpuSize = this.gpgpus[this.currentGPGPUIndex].size
+
+    for (let y = 0; y < gpgpuSize; y++) {
+      for (let x = 0; x < gpgpuSize; x++) {
+        const i = y * gpgpuSize + x
+        const i2 = i * 2
+
+        const uvX = (x + 0.5) / gpgpuSize
+        const uvY = (y + 0.5) / gpgpuSize
+
+        particlesUvArray[i2] = uvX
+        particlesUvArray[i2 + 1] = uvY
+      }
+    }
+
     this.geometry = new THREE.BufferGeometry()
-    this.geometry.setAttribute('position', position)
-    this.geometry.setAttribute('modelUv', uv)
+    this.geometry.setDrawRange(0, this.verticesCount)
+
+    this.geometry.setAttribute('modelUv', colorUvs)
+    this.geometry.setAttribute('aParticlesUv', new THREE.BufferAttribute(particlesUvArray, 2))
     this.geometry.setAttribute('aSize', this.models[this.currentModelIndex].geometry.attributes.aSize)
   }
 
@@ -219,16 +275,25 @@ export default class Particles {
     this.scene.add(this.points)
   }
 
-  createGPGPU() {
-    this.gpgpu = new GPGPU({ count: this.verticesCount, geometry: this.geometry, renderer: this.renderer })
+  createGPGPU(geometry: THREE.BufferGeometry) {
+    this.gpgpus.push(
+      new GPGPU({
+        count: this.verticesCount,
+        geometry: geometry,
+        renderer: this.renderer,
+        scene: this.scene,
+      })
+    )
   }
 
   render(time: number) {
-    const deltaTime = time - this.time
     this.time = time
-
-    this.geometry?.rotateY(deltaTime * 0.1)
-
-    this.gpgpu?.render(time)
+    //this.gpgpus[this.currentGPGPUIndex]?.render(time)
+    this.gpgpus.forEach((gpgpu) => {
+      gpgpu.render(time)
+    })
+    if (this.material && this.gpgpus[this.currentGPGPUIndex]) {
+      this.material.uniforms.uParticlesTexture.value = this.gpgpus[this.currentGPGPUIndex].getTexture()
+    }
   }
 }

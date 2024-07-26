@@ -1,6 +1,10 @@
 uniform vec2 uResolution;
 uniform float uSize;
 
+uniform sampler2D uTexture;
+
+attribute vec2 modelUv;
+varying vec3 vColor;
 
 void main()
 {
@@ -11,4 +15,10 @@ void main()
 
     gl_PointSize = uSize* uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
+
+    vec4 texel = texture(uTexture,modelUv);
+
+    vColor = texel.rgb;
+
+
 }

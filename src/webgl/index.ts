@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Dimensions, Size } from '../types/types'
 import Particles from './particles'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 
 export default class Canvas {
   element: HTMLCanvasElement
@@ -16,6 +17,7 @@ export default class Canvas {
   mouse: THREE.Vector2
   particles: Particles
   orbitControls: OrbitControls
+  gltfLoader: GLTFLoader
 
   constructor() {
     this.element = document.getElementById('webgl') as HTMLCanvasElement
@@ -25,11 +27,16 @@ export default class Canvas {
     this.createCamera()
     this.createRenderer()
     this.setSizes()
+    this.createLoaders()
     this.createRayCaster()
     this.createOrbitControls()
     this.addEventListeners()
     this.createParticles()
     this.render()
+  }
+
+  createLoaders() {
+    this.gltfLoader = new GLTFLoader()
   }
 
   createScene() {
@@ -116,7 +123,7 @@ export default class Canvas {
   }
 
   createParticles() {
-    this.particles = new Particles({ scene: this.scene, dimensions: this.dimensions })
+    this.particles = new Particles({ scene: this.scene, dimensions: this.dimensions, gltfLoader: this.gltfLoader })
   }
 
   render() {

@@ -51,10 +51,6 @@ export default class Particles {
   }
 
   createMaterial() {
-    if (this.material) {
-      this.material.dispose()
-    }
-
     this.material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -274,7 +270,7 @@ export default class Particles {
     this.time = time
 
     this.gpgpus.forEach((gpgpu) => {
-      gpgpu.render(time, deltaTime)
+      gpgpu.render(this.time, deltaTime)
     })
 
     if (this.material && this.gpgpus[this.currentModelIndex]) {

@@ -1,25 +1,23 @@
+#include ../includes/simplexNoise4d.glsl;
+#include ../includes/rotateY.glsl;
+
+uniform float uTime;
 uniform float uDeltaTime;
-
-mat3 rotateY(float angle)
-{
-    float c = cos(angle);
-    float s = sin(angle);
-
-    return mat3(
-        vec3(c,0.,-s),
-        vec3(0.,1.,0.),
-        vec3(s,0.,c)
-    );
-}
+uniform sampler2D uBase;
 
 
 void main()
 {
+    float time = uTime*0.1;
+    
     vec2 uv = gl_FragCoord.xy/resolution.xy;
 
-    vec4 texel = texture(uParticles,uv);
-
-    texel.rgb = rotateY(uDeltaTime*0.2)*texel.rgb;
+    vec4 particle = texture(uParticles,uv);
+    vec4 base = texture(uBase,uv);
     
-    gl_FragColor = texel;
+
+    particle.rgb = rotateY(uDeltaTime*0.2)*particle.rgb;    
+    base.rgb = rotateY(uDeltaTime*0.2)*particle.rgb;    
+    
+    gl_FragColor = particle;
 }

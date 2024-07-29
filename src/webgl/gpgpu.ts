@@ -62,6 +62,8 @@ export default class GPGPU {
   createVariable() {
     this.variable = this.gpgpuRenderer.addVariable('uParticles', fragmentShader, this.dataTexture)
     this.variable.material.uniforms.uDeltaTime = new THREE.Uniform(0)
+    this.variable.material.uniforms.uTime = new THREE.Uniform(0)
+    this.variable.material.uniforms.uBase = new THREE.Uniform(this.dataTexture)
   }
 
   setRendererDependencies() {
@@ -94,6 +96,7 @@ export default class GPGPU {
     this.time = time
 
     this.variable.material.uniforms.uDeltaTime.value = deltaTime
+    this.variable.material.uniforms.uTime.value = this.time
 
     this.gpgpuRenderer.compute()
   }

@@ -4,7 +4,6 @@ uniform float uProgress;
 
 uniform sampler2D uTexture;
 uniform sampler2D uTargetTexture;
-
 uniform sampler2D uParticles;
 uniform sampler2D uParticlesTarget;
 
@@ -16,6 +15,7 @@ attribute float aSize;
 varying vec3 vColor;
 
 #include ../includes/simplexNoise3d.glsl;
+#include ../includes/rotateY.glsl;
 
 void main()
 {            
@@ -36,14 +36,13 @@ void main()
 
     float progress = smoothstep(delay,end,uProgress); 
 
-    vec3 particle =mix(baseParticle.rgb,targetParticle.rgb,progress);
-    
+    vec4 particle =mix(baseParticle,targetParticle,progress);    
     
     vec4 modelPosition = modelMatrix * vec4(particle.rgb, 1.0);
     vec4 viewPosition = viewMatrix * modelPosition;
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
-
+    
     gl_PointSize = uSize*aSize*uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 

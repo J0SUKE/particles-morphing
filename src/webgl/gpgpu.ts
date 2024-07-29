@@ -35,7 +35,7 @@ export default class GPGPU {
     this.createVariable()
     this.setRendererDependencies()
     this.initiateRenderer()
-    this.createDebugPlane()
+    //this.createDebugPlane()
   }
 
   createGPGPURenderer() {
@@ -61,9 +61,7 @@ export default class GPGPU {
 
   createVariable() {
     this.variable = this.gpgpuRenderer.addVariable('uParticles', fragmentShader, this.dataTexture)
-
     this.variable.material.uniforms.uDeltaTime = new THREE.Uniform(0)
-    this.variable.material.uniforms.uProgress = new THREE.Uniform(0)
   }
 
   setRendererDependencies() {
@@ -92,8 +90,7 @@ export default class GPGPU {
     return this.gpgpuRenderer.getCurrentRenderTarget(this.variable).textures[0]
   }
 
-  render(time: number) {
-    const deltaTime = time - this.time
+  render(time: number, deltaTime: number) {
     this.time = time
 
     this.variable.material.uniforms.uDeltaTime.value = deltaTime

@@ -4,26 +4,37 @@ uniform float uProgress;
 
 uniform sampler2D uTexture;
 uniform sampler2D uTargetTexture;
-uniform sampler2D uParticlesTexture;
-uniform sampler2D uParticlesTargetTexture;
+
+uniform sampler2D uParticles;
+uniform sampler2D uParticlesTarget;
 
 attribute vec2 modelUv;
 attribute vec2 targetModelUv;
 attribute vec2 aParticlesUv;
 attribute float aSize;
+
 varying vec3 vColor;
 
 #include ../includes/simplexNoise3d.glsl;
 
 void main()
-{
+{            
     
+    vec4 baseParticle = texture(uParticles,aParticlesUv);
+    vec4 targetParticle = texture(uParticlesTarget,aParticlesUv);
     
+    float noiseOrigin = simplexNoise3d(0.2*baseParticle.rgb);
+    float noiseTarget = simplexNoise3d(0.2*targetParticle.rgb);
+
+    float noise = mix(noiseOrigin,noiseTarget,uProgress);
     
-    float progress = uProgress;
+    noise = smoothstep(-1.,1.,noise);
     
-    vec4 baseParticle = texture(uParticlesTexture,aParticlesUv);
-    vec4 targetParticle = texture(uParticlesTargetTexture,aParticlesUv);
+    float duration = 0.4;
+    float delay = (1.-duration)*noise;
+    float end = delay + duration;
+
+    float progress = smoothstep(delay,end,uProgress); 
 
     vec3 particle =mix(baseParticle.rgb,targetParticle.rgb,progress);
     
@@ -33,11 +44,11 @@ void main()
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
 
-    gl_PointSize = uSize*aSize *uResolution.y;
+    gl_PointSize = uSize*aSize*uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
-    vec4 baseTexel = texture(uTexture,mix(modelUv,targetModelUv,progress));
-    vec4 targetTexel = texture(uTargetTexture,mix(modelUv,targetModelUv,progress));
+    vec4 baseTexel = texture(uTexture,modelUv);
+    vec4 targetTexel = texture(uTargetTexture,targetModelUv);
 
     vec4 texel = mix(baseTexel,targetTexel,progress);
 

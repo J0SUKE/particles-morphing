@@ -1,5 +1,4 @@
 uniform float uDeltaTime;
-uniform float uProgress;
 
 mat3 rotateY(float angle)
 {

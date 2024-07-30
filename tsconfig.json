@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "types": [
       "vite-plugin-glsl/ext"
-    ],
+    ],    
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -20,8 +20,8 @@
     /* Linting */
     "strict": true,
     "strictPropertyInitialization": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"]

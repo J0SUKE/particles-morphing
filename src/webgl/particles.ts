@@ -35,14 +35,17 @@ export default class Particles {
   debug: GUI
   gpgpus: GPGPU[]
   time: number
+  isTransitioning: boolean
 
   constructor({ scene, dimensions, gltfLoader, debug, renderer }: Props) {
     this.scene = scene
     this.dimensions = dimensions
     this.gltfLoader = gltfLoader
     this.debug = debug
+    this.debug.destroy()
     this.renderer = renderer
 
+    this.isTransitioning = false
     this.models = []
     this.gpgpus = []
     this.currentModelIndex = 0
@@ -162,8 +165,6 @@ export default class Particles {
         }
       }
 
-      console.log(newPositionsArray, model.name)
-
       model.geometry.setAttribute('position', new THREE.BufferAttribute(newPositionsArray, 3))
       model.geometry.setAttribute('uv', new THREE.BufferAttribute(newUvsArray, 2))
 
@@ -178,15 +179,33 @@ export default class Particles {
     this.createMaterial()
     this.createPoints()
 
-    this.setDebug()
-
     this.geometry.setAttribute('modelUv', this.models[this.currentModelIndex].geometry.attributes.uv)
     this.material.uniforms.uTexture.value = this.models[this.currentModelIndex].texture
+
+    this.setupButtons()
+  }
+
+  setupButtons() {
+    const nextButton = document.getElementById('next-geometry') as HTMLButtonElement
+    const previousButton = document.getElementById('previous-geometry') as HTMLButtonElement
+
+    nextButton.addEventListener('click', () => {
+      if (this.isTransitioning) return
+      let nextIndex = this.currentModelIndex + 1
+      nextIndex = nextIndex % this.models.length
+
+      this.transitionModel(nextIndex)
+    })
+
+    previousButton.addEventListener('click', () => {
+      if (this.isTransitioning) return
+      const prevIndex = this.currentModelIndex == 0 ? this.models.length - 1 : this.currentModelIndex - 1
+
+      this.transitionModel(prevIndex)
+    })
   }
 
   setDebug() {
-    this.debug.add(this.material.uniforms.uProgress, 'value').min(0).max(1).step(0.001).name('progress').listen()
-
     const f: any = {}
 
     f.m0 = () => this.transitionModel(0)
@@ -229,6 +248,8 @@ export default class Particles {
   }
 
   transitionModel(index: number) {
+    this.isTransitioning = true
+
     this.geometry.setAttribute('targetModelUv', this.models[index].geometry.attributes.uv)
     this.material.uniforms.uTargetTexture.value = this.models[index].texture
     this.material.uniforms.uParticlesTarget.value = this.gpgpus[index].getTexture()
@@ -245,6 +266,7 @@ export default class Particles {
         this.material.uniforms.uParticles.value = this.gpgpus[index].getTexture()
 
         this.currentModelIndex = index
+        this.isTransitioning = false
       },
     })
   }

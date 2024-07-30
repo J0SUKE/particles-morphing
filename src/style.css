@@ -133,12 +133,13 @@ table {
 
 #app {
   position: fixed;
-  inset: 0;
-  top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 3vmax;
   z-index: 10;
   display: flex;
   justify-content: center;
+  gap: 3vmax;
 }
 
 button {
@@ -146,6 +147,7 @@ button {
   outline: none;
   border: none;
   cursor: pointer;
+  pointer-events: default;
 }
 
 svg {
@@ -157,17 +159,4 @@ svg {
 
 svg:hover {
   opacity: 1;
-}
-
-.buttons-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-}
-
-.buttons-wrapper {
-  display: flex;
-  gap: 50px;
-  padding-bottom: 2vmax;
 }

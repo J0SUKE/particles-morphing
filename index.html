@@ -8,22 +8,18 @@
   </head>
   <body>
     <div id="app">
-      <div class="buttons-container">
-        <div class="buttons-wrapper">
-          <button id="previous-geometry">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <polyline points="10 5 3 12 10 19" fill="none" stroke="white" stroke-miterlimit="10" />
-              <line x1="3" y1="12" x2="22" y2="12" fill="none" stroke="white" stroke-miterlimit="10" />
-            </svg>
-          </button>
-          <button id="next-geometry">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <polyline points="14 19 21 12 14 5" fill="none" stroke="white" stroke-miterlimit="10" />
-              <line x1="21" y1="12" x2="2" y2="12" fill="none" stroke="white" stroke-miterlimit="10" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <button id="previous-geometry">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <polyline points="10 5 3 12 10 19" fill="none" stroke="white" stroke-miterlimit="10" />
+          <line x1="3" y1="12" x2="22" y2="12" fill="none" stroke="white" stroke-miterlimit="10" />
+        </svg>
+      </button>
+      <button id="next-geometry">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <polyline points="14 19 21 12 14 5" fill="none" stroke="white" stroke-miterlimit="10" />
+          <line x1="21" y1="12" x2="2" y2="12" fill="none" stroke="white" stroke-miterlimit="10" />
+        </svg>
+      </button>
     </div>
     <canvas id="webgl"></canvas>
     <script type="module" src="/src/main.ts"></script>

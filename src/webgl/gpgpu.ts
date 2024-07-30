@@ -54,7 +54,7 @@ export default class GPGPU {
       this.dataTexture.image.data[i4 + 1] = this.baseGeometry.attributes.position.array[i3 + 1]
       this.dataTexture.image.data[i4 + 2] = this.baseGeometry.attributes.position.array[i3 + 2]
 
-      this.dataTexture.image.data[i4 + 3] = 0
+      this.dataTexture.image.data[i4 + 3] = Math.random()
     }
     //
   }

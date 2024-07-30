@@ -1,6 +1,7 @@
 uniform vec2 uResolution;
 uniform float uSize;
 uniform float uProgress;
+uniform float uDeltaTime;
 
 uniform sampler2D uTexture;
 uniform sampler2D uTargetTexture;
@@ -34,7 +35,7 @@ void main()
     float delay = (1.-duration)*noise;
     float end = delay + duration;
 
-    float progress = smoothstep(delay,end,uProgress); 
+    float progress = smoothstep(delay,end,uProgress);
 
     vec4 particle =mix(baseParticle,targetParticle,progress);    
     
@@ -43,7 +44,12 @@ void main()
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
     
-    gl_PointSize = uSize*aSize*uResolution.y;
+
+    float sizeIn = smoothstep(0.,0.1,particle.a);
+    float sizeOut = smoothstep(1.,0.8,particle.a);
+    float size = min(sizeIn,sizeOut);
+
+    gl_PointSize = uSize*size*aSize*uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
     vec4 baseTexel = texture(uTexture,modelUv);

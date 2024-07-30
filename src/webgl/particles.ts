@@ -67,6 +67,7 @@ export default class Particles {
 
         uSize: new THREE.Uniform(0.03),
         uProgress: new THREE.Uniform(0),
+        uDeltaTime: new THREE.Uniform(0),
 
         //gpgpu variables
         uParticles: new THREE.Uniform(new THREE.Vector4()),
@@ -104,7 +105,7 @@ export default class Particles {
         const geometry = mesh.geometry as THREE.BufferGeometry
         const { customScale } = gltf.parser.json
         geometry.scale(customScale, customScale, customScale)
-        geometry.rotateY(-Math.PI / 5)
+        //geometry.rotateY(-Math.PI / 5)
 
         this.models.push({
           geometry: geometry,
@@ -275,6 +276,7 @@ export default class Particles {
 
     if (this.material && this.gpgpus[this.currentModelIndex]) {
       this.material.uniforms.uParticles.value = this.gpgpus[this.currentModelIndex].getTexture()
+      this.material.uniforms.uDeltaTime.value = deltaTime
     }
   }
 }

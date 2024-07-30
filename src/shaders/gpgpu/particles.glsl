@@ -25,7 +25,7 @@ void main()
     else{
         
         float strenght = simplexNoise4d(vec4(base.xyz,time+1.));
-        strenght = smoothstep(0.,1.,strenght);
+        strenght = smoothstep(-0.2,1.,strenght);
         
         vec3 flowField = vec3(
             simplexNoise4d(vec4(particle.xyz,time)),

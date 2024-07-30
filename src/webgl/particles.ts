@@ -29,6 +29,7 @@ export default class Particles {
     //will store the base geometries
     geometry: THREE.BufferGeometry
     texture: THREE.Texture
+    name: string
   }[]
   currentModelIndex: number
   debug: GUI
@@ -78,9 +79,9 @@ export default class Particles {
 
   loadModels() {
     const promises = Promise.all([
-      this.loadModel('./static/nissan_skyline/scene.gltf'),
-      this.loadModel('./static/suzuki_alto/scene.gltf'),
-      this.loadModel('./static/volkswagen_van/scene.gltf'),
+      this.loadModel('./static/nissan_skyline/scene.gltf', 'nissan skyline'),
+      this.loadModel('./static/suzuki_alto/scene.gltf', 'suzuki alto'),
+      this.loadModel('./static/volkswagen_van/scene.gltf', 'volkswagen van'),
     ])
 
     promises.then(() => {
@@ -88,16 +89,16 @@ export default class Particles {
     })
   }
 
-  loadModel(url: string) {
+  loadModel(url: string, name: string) {
     return new Promise<void>((resolve) => {
       this.gltfLoader.load(url, (gltf) => {
-        this.onModelLoaded(gltf)
+        this.onModelLoaded(gltf, name)
         resolve()
       })
     })
   }
 
-  onModelLoaded(gltf: GLTF) {
+  onModelLoaded(gltf: GLTF, name: string) {
     gltf.scene.traverse((child) => {
       if ('isMesh' in child && child.isMesh) {
         const mesh = child as THREE.Mesh
@@ -109,6 +110,7 @@ export default class Particles {
 
         this.models.push({
           geometry: geometry,
+          name,
           texture: material.map as THREE.Texture,
         })
       }
@@ -143,17 +145,24 @@ export default class Particles {
         } else {
           const rand = Math.random()
 
-          const randI3 = rand * this.verticesCount * 3 - 3
-          const randI2 = rand * this.verticesCount * 2 - 2
+          let randI3 = rand * (count - 1)
+          randI3 = Math.floor(randI3)
+          randI3 *= 3
 
-          newPositionsArray[randI3] = model.geometry.attributes.position.array[randI3]
-          newPositionsArray[randI3 + 1] = model.geometry.attributes.position.array[randI3 + 1]
-          newPositionsArray[randI3 + 2] = model.geometry.attributes.position.array[randI3 + 2]
+          let randI2 = rand * (count - 1)
+          randI2 = Math.floor(randI2)
+          randI2 *= 2
 
-          newUvsArray[randI2] = model.geometry.attributes.uv.array[randI2]
-          newUvsArray[randI2 + 1] = model.geometry.attributes.uv.array[randI2 + 1]
+          newPositionsArray[i3] = model.geometry.attributes.position.array[randI3]
+          newPositionsArray[i3 + 1] = model.geometry.attributes.position.array[randI3 + 1]
+          newPositionsArray[i3 + 2] = model.geometry.attributes.position.array[randI3 + 2]
+
+          newUvsArray[i2] = model.geometry.attributes.uv.array[randI2]
+          newUvsArray[i2 + 1] = model.geometry.attributes.uv.array[randI2 + 1]
         }
       }
+
+      console.log(newPositionsArray, model.name)
 
       model.geometry.setAttribute('position', new THREE.BufferAttribute(newPositionsArray, 3))
       model.geometry.setAttribute('uv', new THREE.BufferAttribute(newUvsArray, 2))

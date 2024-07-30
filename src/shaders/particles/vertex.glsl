@@ -52,12 +52,12 @@ void main()
     gl_PointSize = uSize*size*aSize*uResolution.y;
     gl_PointSize *= (1.0 / - viewPosition.z);
 
-    vec4 baseTexel = texture(uTexture,modelUv);
-    vec4 targetTexel = texture(uTargetTexture,targetModelUv);
+    vec4 baseColor = texture(uTexture,modelUv);
+    vec4 targetColor = texture(uTargetTexture,targetModelUv);
 
-    vec4 texel = mix(baseTexel,targetTexel,progress);
+    vec4 color = mix(baseColor,targetColor,progress);
 
-    vColor = texel.rgb;
+    vColor = color.rgb;
 
 
 }
